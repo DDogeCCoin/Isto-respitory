@@ -1,0 +1,108 @@
+// Copyright Istio Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package istio.workload;
+option go_package = "test/envoye2e/workloadapi";
+
+/**
+ * Warning: Derived from
+ * https://github.com/istio/ztunnel/blob/e36680f1534fae3d158964500ae9185495ec5d7b/proto/workload.proto
+ * with the following changes:
+ *
+ * 1) delete unused fields;
+ * 2) change go_package;
+ * 3) append bootstrap extension stub;
+ */
+
+message Workload {
+  string uid = 20;
+
+  // Name represents the name for the workload.
+  // For Kubernetes, this is the pod name.
+  // This is just for debugging and may be elided as an optimization.
+  string name = 1;
+
+  // Namespace represents the namespace for the workload.
+  // This is just for debugging and may be elided as an optimization.
+  string namespace = 2;
+
+  // Address represents the IPv4/IPv6 address for the workload.
+  // This should be globally unique.
+  // This should not have a port number.
+  // Each workload must have at least either an address or hostname; not both.
+  // TODO: support dual stack by making this repeated
+  // TODO: when this is repeated, update xds primary key from network/IP to network/UID
+  repeated bytes addresses = 3;
+
+  reserved "hostname";
+  reserved 21;
+
+  // Network represents the network this workload is on. This may be elided for the default network.
+  // A (network,address) pair makeup a unique key for a workload *at a point in time*.
+  string network = 4;
+
+  reserved "tunnel_protocol";
+  reserved 5;
+
+  // The SPIFFE identity of the workload. The identity is joined to form spiffe://<trust_domain>/ns/<namespace>/sa/<service_account>.
+  // TrustDomain of the workload. May be elided if this is the mesh wide default (typically cluster.local)
+  string trust_domain = 6;
+
+  // ServiceAccount of the workload. May be elided if this is "default"
+  string service_account = 7;
+
+  reserved "waypoint";
+  reserved 8;
+
+  reserved "network_gateway";
+  reserved 19;
+
+  reserved "node";
+  reserved 9;
+
+  // CanonicalName for the workload. Used for telemetry.
+  string canonical_name = 10;
+
+  // CanonicalRevision for the workload. Used for telemetry.
+  string canonical_revision = 11;
+
+  // WorkloadType represents the type of the workload. Used for telemetry.
+  WorkloadType workload_type = 12;
+
+  // WorkloadName represents the name for the workload (of type WorkloadType). Used for telemetry.
+  string workload_name = 13;
+
+  reserved "native_tunnel";
+  reserved 14;
+
+  reserved "virtual_ips";
+  reserved 15;
+
+  reserved "authorization_policies";
+  reserved 16;
+
+  reserved "status";
+  reserved 17;
+
+  string cluster_id = 18;
+}
+
+enum WorkloadType {
+  DEPLOYMENT = 0;
+  CRONJOB = 1;
+  POD = 2;
+  JOB = 3;
+}
